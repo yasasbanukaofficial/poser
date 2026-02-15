@@ -14,9 +14,8 @@ Theme: Brutalist Dark / Lime High-Contrast
 --poser-text-muted: #71717a; / zinc-500 */
 }
 
-/* Base Reset */
 
-* {
+{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
