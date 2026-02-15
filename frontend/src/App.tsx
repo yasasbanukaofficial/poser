@@ -12,6 +12,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>("customer");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   const mockCustomers: Customer[] = [
     { id: "001-ALPHA", name: "Aura Systems", address: "San Francisco, CA" },
@@ -24,9 +25,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-300 antialiased flex">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
 
-      <main className="flex-1 ml-64 p-12 md:p-20 flex flex-col relative min-h-screen">
+      <main className="flex-1 md:ml-48 lg:ml-64 p-4 sm:p-6 md:p-12 lg:p-20 flex flex-col relative min-h-screen">
         {/* Top Meta Info */}
         <div className="flex justify-between items-center mb-24 font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600">
           <div>
@@ -49,10 +55,12 @@ export default function App() {
           }
           subtitle="POSER Management Console"
           onAddClick={() => setIsModalOpen(true)}
+          setIsSidebarOpen={setIsSidebarOpen}
+          isSidebarOpen={isSidebarOpen}
         />
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-24">
           <StatCard label="Live Nodes" value="50+" />
           <StatCard label="Automation" value="83%" />
           <StatCard label="Savings" value="$12.4M" />

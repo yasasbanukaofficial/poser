@@ -1,8 +1,13 @@
-import { Package, ShoppingCart, User } from "lucide-react";
+import { Package, ShoppingCart, User, X } from "lucide-react";
 import { type SidebarProps } from "../interfaces/Sidebar";
 import SidebarItem from "./SidebarItem";
 
-const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
+const Sidebar = ({
+  activeTab,
+  setActiveTab,
+  isSidebarOpen,
+  setIsSidebarOpen,
+}: SidebarProps) => {
   const tabs = [
     { id: "item", label: "Inventory", icon: Package },
     { id: "order", label: "Orders", icon: ShoppingCart },
@@ -10,11 +15,21 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-black border-r border-zinc-800 flex flex-col pt-12 z-40">
-      <div className="px-8 mb-16">
+    <aside
+      className={`fixed left-0 top-0 h-screen md:w-48 lg:w-64 bg-black border-r border-zinc-800 flex flex-col pt-12 z-40 transform ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } md:translate-x-0 transition-transform duration-300 ease-in-out`}
+    >
+      <div className="px-8 mb-16 flex justify-between items-center">
         <h1 className="text-2xl font-black tracking-tighter text-white italic">
           POSER<span className="text-[#d4ff00] not-italic">®</span>
         </h1>
+        <button
+          className="md:hidden text-zinc-400 hover:text-white"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <X size={20} />
+        </button>
       </div>
       <nav className="flex-1">
         {tabs.map((tab) => (
@@ -23,7 +38,10 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
             icon={tab.icon}
             label={tab.label}
             isActive={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              setIsSidebarOpen(false); // Close sidebar on tab change in mobile
+            }}
           />
         ))}
       </nav>
@@ -37,3 +55,4 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 };
 
 export default Sidebar;
+

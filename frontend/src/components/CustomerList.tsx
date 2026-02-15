@@ -14,21 +14,21 @@ const CustomerList = ({
 
   return (
     <section className="flex flex-col flex-1">
-      <div className="flex items-center justify-between mb-8 border-b border-zinc-800 pb-4">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 border-b border-zinc-800 pb-4 gap-4">
         <div className="flex items-center gap-2">
           <LayoutGrid size={16} className="text-[#d4ff00]" />
           <h3 className="text-xs font-black uppercase tracking-widest text-white">
             Registry Database
           </h3>
         </div>
-        <div className="flex items-center gap-4 bg-zinc-900/50 px-4 py-2 border border-zinc-800 focus-within:border-[#d4ff00] transition-colors">
+        <div className="flex items-center gap-4 bg-zinc-900/50 px-4 py-2 border border-zinc-800 focus-within:border-[#d4ff00] transition-colors w-full md:w-auto">
           <Search size={14} className="text-zinc-600" />
           <input
             type="text"
             placeholder="SEARCH REGISTRY..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-[10px] font-mono text-white placeholder-zinc-700 focus:outline-none w-48 uppercase tracking-widest"
+            className="bg-transparent text-[10px] font-mono text-white placeholder-zinc-700 focus:outline-none w-full md:w-48 uppercase tracking-widest"
           />
         </div>
       </div>
@@ -38,16 +38,16 @@ const CustomerList = ({
           filtered.map((c, i) => (
             <div
               key={i}
-              className="bg-[#0a0a0a] p-8 flex justify-between items-center group hover:bg-zinc-900/40 transition-all cursor-crosshair"
+              className="bg-[#0a0a0a] p-6 md:p-8 flex justify-between items-center group hover:bg-zinc-900/40 transition-all cursor-crosshair"
             >
-              <div className="grid grid-cols-4 w-full items-center">
+              <div className="grid grid-cols-1 md:grid-cols-4 w-full items-center gap-4">
                 <div className="col-span-1 font-mono text-[#d4ff00] text-xs">
                   {c.id}
                 </div>
                 <div className="col-span-1 text-lg font-black text-white uppercase tracking-tight">
                   {c.name}
                 </div>
-                <div className="col-span-1 text-xs text-zinc-500 uppercase tracking-widest">
+                <div className="col-span-1 text-xs text-zinc-500 uppercase tracking-widest hidden md:block">
                   {c.address}
                 </div>
                 <div className="col-span-1 flex justify-end">
@@ -71,3 +71,4 @@ const CustomerList = ({
 };
 
 export default CustomerList;
+

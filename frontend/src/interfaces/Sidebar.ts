@@ -10,4 +10,6 @@ export interface SidebarItemProps {
 export interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (isOpen: boolean) => void;
 }
