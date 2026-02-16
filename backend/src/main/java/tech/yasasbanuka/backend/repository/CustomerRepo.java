@@ -1,4 +1,7 @@
 package tech.yasasbanuka.backend.repository;
 
-public class CustomerRepo {
+import org.springframework.data.jpa.repository.JpaRepository;
+import tech.yasasbanuka.backend.entity.Customer;
+
+public interface CustomerRepo extends JpaRepository<Customer, Long> {
 }

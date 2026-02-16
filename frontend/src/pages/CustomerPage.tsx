@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { type Customer } from "../interfaces/Customer";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
 import CustomerList from "../components/CustomerList";
@@ -104,9 +103,16 @@ const CustomerPage = ({
         </div>
 
         <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
-          <FormField label="Identifier ID" placeholder="XXXX-0000" />
-          <FormField label="Full Name" placeholder="Entity Name" />
-          <FormField label="Postal Address" placeholder="Global Location" />
+          <FormField
+            name="custName"
+            label="Full Name"
+            placeholder="Entity Name"
+          />
+          <FormField
+            name="custAddress"
+            label="Postal Address"
+            placeholder="Global Location"
+          />
 
           <button className="mt-10 w-full bg-[#d4ff00] py-5 text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all flex items-center justify-center gap-2">
             Confirm Entry <ChevronRight size={14} />
