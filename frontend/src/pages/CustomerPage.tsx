@@ -13,11 +13,11 @@ interface CustomerPageProps {
   setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
-const CustomerPage: React.FC<CustomerPageProps> = ({
+const CustomerPage = ({
   activeTab,
   isSidebarOpen,
   setIsSidebarOpen,
-}) => {
+}: CustomerPageProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
 

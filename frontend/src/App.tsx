@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
-import CustomerPage from "./pages/CustomerPage"; // Import the new CustomerPage
+import CustomerPage from "./pages/CustomerPage";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>("customer");
@@ -15,7 +15,6 @@ export default function App() {
         setIsSidebarOpen={setIsSidebarOpen}
       />
 
-      {/* Conditionally render CustomerPage. We can add other pages here later */}
       {activeTab === "customer" && (
         <CustomerPage
           activeTab={activeTab}
