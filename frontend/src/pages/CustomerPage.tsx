@@ -30,15 +30,6 @@ const CustomerPage = ({
     return <div>Error loading customers</div>;
   }
 
-  const mockCustomers: Customer[] = [
-    { id: "001-ALPHA", name: "Aura Systems", address: "San Francisco, CA" },
-    { id: "002-NEXUS", name: "Nexus Core", address: "Berlin, DE" },
-    { id: "003-VORTX", name: "Vortex Dynamics", address: "Tokyo, JP" },
-    { id: "004-QUANT", name: "Quantum Labs", address: "London, UK" },
-    { id: "005-OMEGA", name: "Omega Robotics", address: "Seoul, KR" },
-    { id: "006-PHASE", name: "Phase Shift Inc", address: "Austin, TX" },
-  ];
-
   return (
     <main className="flex-1 md:ml-48 lg:ml-64 p-4 sm:p-6 md:p-12 lg:p-20 flex flex-col relative min-h-screen">
       {/* Top Meta Info */}
@@ -68,9 +59,9 @@ const CustomerPage = ({
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-24">
-        <StatCard label="Live Nodes" value="50+" />
+        <StatCard label="Customers" value={customers.length} />
         <StatCard label="Automation" value="83%" />
-        <StatCard label="Savings" value="$12.4M" />
+        <StatCard label="Customer Details Validation" value="100%" />
         <StatCard label="Uptime" value="99.9%" />
       </div>
 
