@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { type Customer } from "../interfaces/Customer";
 import Header from "../components/Header";
@@ -6,6 +6,7 @@ import StatCard from "../components/StatCard";
 import CustomerList from "../components/CustomerList";
 import Modal from "../components/Modal";
 import FormField from "../components/FormField";
+import { useUser } from "../hooks/useUser";
 
 interface CustomerPageProps {
   activeTab: string;
@@ -20,6 +21,14 @@ const CustomerPage = ({
 }: CustomerPageProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const { data: customers, isLoading, error } = useUser();
+
+  if (isLoading) {
+    return <div>Loading customers...</div>;
+  }
+  if (error) {
+    return <div>Error loading customers</div>;
+  }
 
   const mockCustomers: Customer[] = [
     { id: "001-ALPHA", name: "Aura Systems", address: "San Francisco, CA" },
@@ -68,7 +77,7 @@ const CustomerPage = ({
       {/* Database Section */}
       {activeTab === "customer" ? (
         <CustomerList
-          customers={mockCustomers}
+          customers={customers || []}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
         />
