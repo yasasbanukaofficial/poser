@@ -6,6 +6,8 @@ import CustomerList from "../components/CustomerList";
 import Modal from "../components/Modal";
 import FormField from "../components/FormField";
 import { useUser } from "../hooks/useUser";
+import { sendCustomerData } from "../services/api";
+import type { Customer } from "../interfaces/Customer";
 
 interface CustomerPageProps {
   activeTab: string;
@@ -27,6 +29,29 @@ const CustomerPage = ({
   }
   if (error) {
     return <div>Error loading customers</div>;
+  }
+
+  async function handleSubmit(formData: FormData) {
+    try {
+      const name = formData.get("custName") as string;
+      const address = formData.get("custAddress") as string;
+
+      if (!name || !address) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const result = await sendCustomerData({
+        name: name,
+        address,
+      } as Customer);
+      if (result) {
+        setIsModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Submission failed:", error);
+      alert("Failed to save customer. Please check the console.");
+    }
   }
 
   return (
@@ -102,7 +127,7 @@ const CustomerPage = ({
           </p>
         </div>
 
-        <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-2" action={handleSubmit}>
           <FormField
             name="custName"
             label="Full Name"

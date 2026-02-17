@@ -1,3 +1,5 @@
+import type { Customer } from "../interfaces/Customer";
+
 const URL = `http://localhost:8080/api/v1`;
 
 export const fetchCustomerData = async () => {
@@ -12,13 +14,17 @@ export const fetchCustomerData = async () => {
   }));
 };
 
-export const sendCustomerData = async () => {
+export const sendCustomerData = async (payload: Customer) => {
   const res = await fetch(`${URL}/customers`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to fetch");
-  return await res.json();
+  if (!res.ok) {
+    throw new Error("Failed to fetch");
+  } else {
+    return true;
+  }
 };
