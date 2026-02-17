@@ -8,5 +8,6 @@ public interface ItemService {
     void updateItem(ItemDTO itemDTO);
     void deleteItem(Long id);
     ItemDTO getItem(Long identity);
+    ItemDTO getItemByName(String name);
     List<ItemDTO> getAllItems();
 }

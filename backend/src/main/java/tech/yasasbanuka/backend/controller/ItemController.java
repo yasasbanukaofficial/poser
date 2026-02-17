@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/items")
-@CrossOrigin(origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
@@ -18,24 +18,23 @@ public class ItemController {
     void createItem(@RequestBody ItemDTO itemDTO) {
         itemService.createItem(itemDTO);
     }
-
-    @PutMapping
+    @PutMapping()
     void updateItem(@RequestBody ItemDTO itemDTO) {
+        ItemDTO existingItem = itemService.getItem(itemDTO.getId());
+        itemDTO.setId(existingItem.getId());
         itemService.updateItem(itemDTO);
     }
-
     @DeleteMapping("/{id}")
     void deleteItem(@PathVariable Long id) {
         itemService.deleteItem(id);
     }
-
     @GetMapping("/{id}")
-    ItemDTO getItem(@PathVariable Long id) {
-        return itemService.getItem(id);
+    void getItem(@PathVariable Long id) {
+        itemService.getItem(id);
     }
-
     @GetMapping
     List<ItemDTO> getAllItems() {
         return itemService.getAllItems();
     }
+
 }
