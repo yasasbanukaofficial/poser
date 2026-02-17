@@ -7,11 +7,12 @@ import Modal from "../components/ui/Modal";
 import FormField from "../components/ui/FormField";
 import {
   createCustomer,
-  fetchCustomerData,
+  deleteCustomer,
   updateCustomer,
 } from "../features/customers/api/api";
 import type { Customer } from "../features/customers/types/Customer";
 import { useUser } from "../features/customers/hooks/useUser";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CustomerPageProps {
   activeTab: string;
@@ -33,11 +34,9 @@ const CustomerPage = ({
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null,
   );
+  const queryClient = useQueryClient();
 
-  const [state, formAction, isPending] = useActionState(
-    updateCustomerDetails,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState(handleUpdate, null);
 
   if (isLoading) {
     return <div>Loading customers...</div>;
@@ -46,7 +45,7 @@ const CustomerPage = ({
     return <div>Error loading customers</div>;
   }
 
-  async function updateCustomerDetails(prevState: any, formData: FormData) {
+  async function handleUpdate(prevState: any, formData: FormData) {
     const name = formData.get("custName") as string;
     const address = formData.get("custAddress") as string;
 
@@ -70,6 +69,7 @@ const CustomerPage = ({
       }
 
       setIsModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
       return true;
     } catch (error) {
       console.error("Submission failed:", error);
@@ -92,14 +92,19 @@ const CustomerPage = ({
     setIsModalOpen(true);
   }
 
-  function handleDelete() {
-    if (!selectedCustomer) return;
-    const ok = window.confirm("Delete this customer? This cannot be undone.");
-    if (!ok) return;
-    // Placeholder: implement real delete call if API supports it.
-    console.log("Delete customer", selectedCustomer.id);
-    alert("Delete action triggered (not implemented)");
-    setIsModalOpen(false);
+  async function handleDelete() {
+    try {
+      if (selectedCustomer) {
+        await deleteCustomer({ id } as Customer);
+        queryClient.invalidateQueries({ queryKey: ["customers"] });
+        setIsModalOpen(false);
+      } else {
+        throw new Error("deleting customer failed, select a customer!");
+      }
+    } catch (error) {
+      console.error("Submission failed:", error);
+      alert("Failed to save customer. Please check the console.");
+    }
   }
 
   return (
