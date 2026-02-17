@@ -1,15 +1,15 @@
 import { LayoutGrid, Search, ChevronRight } from "lucide-react";
-import { type CustomerListProps } from "../interfaces/Customer";
+import { type CustomerListProps, type Customer } from "../interfaces/Customer";
 
 const CustomerList = ({
   customers,
   searchQuery,
   setSearchQuery,
+  onSelectCustomer,
 }: CustomerListProps) => {
-  const filtered = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.id.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filtered = customers.filter((c: Customer) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.id || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -35,9 +35,10 @@ const CustomerList = ({
 
       <div className="grid grid-cols-1 gap-px bg-zinc-900 border border-zinc-900 mb-20">
         {filtered.length > 0 ? (
-          filtered.map((c, i) => (
+          filtered.map((c: Customer, i: number) => (
             <div
               key={i}
+              onClick={() => onSelectCustomer && onSelectCustomer(c)}
               className="bg-[#0a0a0a] p-6 md:p-8 flex justify-between items-center group hover:bg-zinc-900/40 transition-all cursor-crosshair"
             >
               <div className="grid grid-cols-1 md:grid-cols-4 w-full items-center gap-4">
@@ -51,7 +52,13 @@ const CustomerList = ({
                   {c.address}
                 </div>
                 <div className="col-span-1 flex justify-end">
-                  <button className="opacity-0 group-hover:opacity-100 transition-opacity p-2 border border-zinc-800 text-zinc-500 hover:text-[#d4ff00] hover:border-[#d4ff00]">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectCustomer && onSelectCustomer(c);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-2 border border-zinc-800 text-zinc-500 hover:text-[#d4ff00] hover:border-[#d4ff00]"
+                  >
                     <ChevronRight size={18} />
                   </button>
                 </div>

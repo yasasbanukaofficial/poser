@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { type ModalProps } from "../interfaces/Modal";
 
-const Modal = ({ isOpen, onClose, children }: ModalProps) => {
+const Modal = ({ isOpen, onClose, children, footer }: ModalProps) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
@@ -17,6 +17,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
           <X size={20} />
         </button>
         {children}
+        {footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
       </div>
     </div>
   );

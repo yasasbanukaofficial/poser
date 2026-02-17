@@ -23,6 +23,9 @@ const CustomerPage = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: customers, isLoading, error } = useUser();
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [name, setName] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
 
   if (isLoading) {
     return <div>Loading customers...</div>;
@@ -31,27 +34,58 @@ const CustomerPage = ({
     return <div>Error loading customers</div>;
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     try {
-      const name = formData.get("custName") as string;
-      const address = formData.get("custAddress") as string;
-
       if (!name || !address) {
         alert("Please fill in all fields.");
         return;
       }
 
       const result = await sendCustomerData({
-        name: name,
+        name,
         address,
       } as Customer);
       if (result) {
         setIsModalOpen(false);
+        setName("");
+        setAddress("");
       }
     } catch (error) {
       console.error("Submission failed:", error);
       alert("Failed to save customer. Please check the console.");
     }
+  }
+
+  function handleOpenCreate() {
+    setSelectedCustomer(null);
+    setName("");
+    setAddress("");
+    setIsModalOpen(true);
+  }
+
+  function handleSelectCustomer(c: Customer) {
+    setSelectedCustomer(c);
+    setName(c.name);
+    setAddress(c.address || "");
+    setIsModalOpen(true);
+  }
+
+  function handleUpdate() {
+    // Placeholder: implement real update call if API supports it.
+    console.log("Update customer", selectedCustomer?.id, { name, address });
+    alert("Update action triggered (not implemented)");
+    setIsModalOpen(false);
+  }
+
+  function handleDelete() {
+    if (!selectedCustomer) return;
+    const ok = window.confirm("Delete this customer? This cannot be undone.");
+    if (!ok) return;
+    // Placeholder: implement real delete call if API supports it.
+    console.log("Delete customer", selectedCustomer.id);
+    alert("Delete action triggered (not implemented)");
+    setIsModalOpen(false);
   }
 
   return (
@@ -76,7 +110,7 @@ const CustomerPage = ({
               : "Orders."
         }
         subtitle="POSER Management Console"
-        onAddClick={() => setIsModalOpen(true)}
+        onAddClick={() => handleOpenCreate()}
         setIsSidebarOpen={setIsSidebarOpen}
         isSidebarOpen={isSidebarOpen}
       />
@@ -95,6 +129,7 @@ const CustomerPage = ({
           customers={customers || []}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onSelectCustomer={handleSelectCustomer}
         />
       ) : (
         <div className="flex-1 border border-dashed border-zinc-800 flex items-center justify-center mb-20">
@@ -112,11 +147,32 @@ const CustomerPage = ({
       </div>
 
       {/* Modal Popup */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        footer={
+          selectedCustomer ? (
+            <>
+              <button
+                onClick={handleUpdate}
+                className="px-6 py-3 bg-[#d4ff00] text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all"
+              >
+                Update
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-6 py-3 bg-[#ff4d4f] text-white text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all"
+              >
+                Delete
+              </button>
+            </>
+          ) : undefined
+        }
+      >
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[#d4ff00] font-mono text-[10px]">
-              [CREATE]
+              {selectedCustomer ? "[EDIT]" : "[CREATE]"}
             </span>
             <h3 className="text-xs font-black uppercase tracking-widest text-white">
               Registry Entry
@@ -126,22 +182,27 @@ const CustomerPage = ({
             Enter secure data to populate the POSER global ledger.
           </p>
         </div>
-
-        <form className="space-y-2" action={handleSubmit}>
+        <form className="space-y-2" onSubmit={handleSubmit}>
           <FormField
             name="custName"
             label="Full Name"
             placeholder="Entity Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
           <FormField
             name="custAddress"
             label="Postal Address"
             placeholder="Global Location"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
 
-          <button className="mt-10 w-full bg-[#d4ff00] py-5 text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all flex items-center justify-center gap-2">
-            Confirm Entry <ChevronRight size={14} />
-          </button>
+          {!selectedCustomer && (
+            <button className="mt-10 w-full bg-[#d4ff00] py-5 text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all flex items-center justify-center gap-2">
+              Confirm Entry <ChevronRight size={14} />
+            </button>
+          )}
         </form>
       </Modal>
     </main>
