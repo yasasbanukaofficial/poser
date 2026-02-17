@@ -32,7 +32,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO getCustomer(Long id) {
-        Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Error when finding the customer"));
+        Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Error when finding the customer using id"));
+        return modelMapper.map(customer, CustomerDTO.class);
+    }
+
+    @Override
+    public CustomerDTO getCustomerByName(String name) {
+        Customer customer = customerRepo.findByName(name).orElseThrow(() -> new RuntimeException("Error when finding the customer using name"));
         return modelMapper.map(customer, CustomerDTO.class);
     }
 

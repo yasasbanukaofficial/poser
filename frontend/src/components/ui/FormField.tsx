@@ -1,21 +1,13 @@
-import type { ChangeEvent } from "react";
-
-export interface FormFieldProps {
-  name: string;
+export interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  placeholder: string;
-  type?: string;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  value?: string;
 }
 
 const FormField = ({
   name,
   label,
   placeholder,
-  type = "text",
-  onChange,
-  value,
+  defaultValue,
+  ...props
 }: FormFieldProps) => (
   <div className="flex flex-col gap-2 mb-6">
     <label className="text-[10px] font-mono uppercase text-zinc-500 tracking-widest">
@@ -23,10 +15,9 @@ const FormField = ({
     </label>
     <input
       name={name}
-      type={type}
       placeholder={placeholder}
-      onChange={onChange}
-      value={value}
+      defaultValue={defaultValue}
+      {...props}
       className="bg-transparent border-b border-zinc-800 py-3 text-white placeholder-zinc-700 focus:outline-none focus:border-[#d4ff00] transition-colors"
     />
   </div>

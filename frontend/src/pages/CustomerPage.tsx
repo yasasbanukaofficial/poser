@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import Header from "../components/layout/Header";
 import StatCard from "../components/ui/StatCard";
 import CustomerList from "../features/customers/components/CustomerList";
 import Modal from "../components/ui/Modal";
 import FormField from "../components/ui/FormField";
-import { sendCustomerData } from "../features/customers/api/api";
+import {
+  createCustomer,
+  fetchCustomerData,
+  updateCustomer,
+} from "../features/customers/api/api";
 import type { Customer } from "../features/customers/types/Customer";
 import { useUser } from "../features/customers/hooks/useUser";
 
@@ -23,11 +27,17 @@ const CustomerPage = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: customers, isLoading, error } = useUser();
+  const [id, setId] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null,
   );
-  const [name, setName] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+
+  const [state, formAction, isPending] = useActionState(
+    updateCustomerDetails,
+    null,
+  );
 
   if (isLoading) {
     return <div>Loading customers...</div>;
@@ -36,23 +46,31 @@ const CustomerPage = ({
     return <div>Error loading customers</div>;
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function updateCustomerDetails(prevState: any, formData: FormData) {
+    const name = formData.get("custName") as string;
+    const address = formData.get("custAddress") as string;
+
     try {
       if (!name || !address) {
         alert("Please fill in all fields.");
         return;
       }
 
-      const result = await sendCustomerData({
-        name,
-        address,
-      } as Customer);
-      if (result) {
-        setIsModalOpen(false);
-        setName("");
-        setAddress("");
+      if (selectedCustomer) {
+        await updateCustomer({
+          id,
+          name,
+          address,
+        } as Customer);
+      } else {
+        await createCustomer({
+          name,
+          address,
+        } as Customer);
       }
+
+      setIsModalOpen(false);
+      return true;
     } catch (error) {
       console.error("Submission failed:", error);
       alert("Failed to save customer. Please check the console.");
@@ -68,16 +86,10 @@ const CustomerPage = ({
 
   function handleSelectCustomer(c: Customer) {
     setSelectedCustomer(c);
+    setId(c.id || "");
     setName(c.name);
     setAddress(c.address || "");
     setIsModalOpen(true);
-  }
-
-  function handleUpdate() {
-    // Placeholder: implement real update call if API supports it.
-    console.log("Update customer", selectedCustomer?.id, { name, address });
-    alert("Update action triggered (not implemented)");
-    setIsModalOpen(false);
   }
 
   function handleDelete() {
@@ -156,7 +168,8 @@ const CustomerPage = ({
           selectedCustomer ? (
             <>
               <button
-                onClick={handleUpdate}
+                form="customer-form"
+                disabled={isPending}
                 className="px-6 py-3 bg-[#d4ff00] text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all"
               >
                 Update
@@ -184,20 +197,18 @@ const CustomerPage = ({
             Enter secure data to populate the POSER global ledger.
           </p>
         </div>
-        <form className="space-y-2" onSubmit={handleSubmit}>
+        <form id="customer-form" className="space-y-2" action={formAction}>
           <FormField
             name="custName"
             label="Full Name"
             placeholder="Entity Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            defaultValue={name}
           />
           <FormField
             name="custAddress"
             label="Postal Address"
             placeholder="Global Location"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            defaultValue={address}
           />
 
           {!selectedCustomer && (

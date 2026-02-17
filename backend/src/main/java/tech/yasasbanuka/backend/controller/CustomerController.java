@@ -20,6 +20,8 @@ public class CustomerController {
     }
     @PutMapping()
     void updateCustomer(@RequestBody CustomerDTO customerDTO) {
+        CustomerDTO existingCustomer = customerService.getCustomer(customerDTO.getId());
+        customerDTO.setId(existingCustomer.getId());
         customerService.updateCustomer(customerDTO);
     }
     @DeleteMapping("/{id}")
