@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/layout/Sidebar";
 import CustomerPage from "./pages/CustomerPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

@@ -1,4 +1,4 @@
-import { type SidebarItemProps } from "../interfaces/Sidebar";
+import { type SidebarItemProps } from "../../interfaces/Sidebar";
 
 const SidebarItem = ({
   icon: Icon,

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import Header from "../components/Header";
-import StatCard from "../components/StatCard";
-import CustomerList from "../components/CustomerList";
-import Modal from "../components/Modal";
-import FormField from "../components/FormField";
-import { useUser } from "../hooks/useUser";
-import { sendCustomerData } from "../services/api";
-import type { Customer } from "../interfaces/Customer";
+import Header from "../components/layout/Header";
+import StatCard from "../components/ui/StatCard";
+import CustomerList from "../features/customers/components/CustomerList";
+import Modal from "../components/ui/Modal";
+import FormField from "../components/ui/FormField";
+import { sendCustomerData } from "../features/customers/api/api";
+import type { Customer } from "../features/customers/types/Customer";
+import { useUser } from "../features/customers/hooks/useUser";
 
 interface CustomerPageProps {
   activeTab: string;
@@ -23,7 +23,9 @@ const CustomerPage = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: customers, isLoading, error } = useUser();
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  );
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
 

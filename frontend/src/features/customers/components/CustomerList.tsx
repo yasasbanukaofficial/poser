@@ -1,5 +1,5 @@
 import { LayoutGrid, Search, ChevronRight } from "lucide-react";
-import { type CustomerListProps, type Customer } from "../interfaces/Customer";
+import { type CustomerListProps, type Customer } from "../types/Customer";
 
 const CustomerList = ({
   customers,
@@ -7,9 +7,10 @@ const CustomerList = ({
   setSearchQuery,
   onSelectCustomer,
 }: CustomerListProps) => {
-  const filtered = customers.filter((c: Customer) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.id || "").toLowerCase().includes(searchQuery.toLowerCase()),
+  const filtered = customers.filter(
+    (c: Customer) =>
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.id || "").toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -78,4 +79,3 @@ const CustomerList = ({
 };
 
 export default CustomerList;
-

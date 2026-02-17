@@ -1,5 +1,12 @@
 import { Menu, Plus } from "lucide-react";
-import { type HeaderProps } from "../interfaces/Header";
+
+export interface HeaderProps {
+  title: string;
+  subtitle: string;
+  onAddClick: () => void;
+  setIsSidebarOpen: (isOpen: boolean) => void;
+  isSidebarOpen: boolean;
+}
 
 const Header = ({
   title,
@@ -50,4 +57,3 @@ const Header = ({
 );
 
 export default Header;
-

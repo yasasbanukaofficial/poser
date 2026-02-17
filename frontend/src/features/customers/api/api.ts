@@ -1,4 +1,4 @@
-import type { Customer } from "../interfaces/Customer";
+import type { Customer } from "../types/Customer";
 
 const URL = `http://localhost:8080/api/v1`;
 

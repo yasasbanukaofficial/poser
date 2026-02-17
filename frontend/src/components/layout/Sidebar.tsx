@@ -1,6 +1,20 @@
 import { Package, ShoppingCart, User, X } from "lucide-react";
-import { type SidebarProps } from "../interfaces/Sidebar";
-import SidebarItem from "./SidebarItem";
+import SidebarItem from "../ui/SidebarItem";
+import { type LucideIcon } from "lucide-react";
+
+export interface SidebarItemProps {
+  icon: LucideIcon;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+export interface SidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (isOpen: boolean) => void;
+}
 
 const Sidebar = ({
   activeTab,
@@ -55,4 +69,3 @@ const Sidebar = ({
 };
 
 export default Sidebar;
-

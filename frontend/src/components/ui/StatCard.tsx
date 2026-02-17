@@ -1,4 +1,7 @@
-import { type StatCardProps } from "../interfaces/StatCard";
+export interface StatCardProps {
+  label: string;
+  value: string;
+}
 
 const StatCard = ({ label, value }: StatCardProps) => (
   <div className="border-l border-zinc-800 pl-6 py-2">

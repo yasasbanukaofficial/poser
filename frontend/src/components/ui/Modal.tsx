@@ -1,5 +1,13 @@
 import { X } from "lucide-react";
-import { type ModalProps } from "../interfaces/Modal";
+
+import { type ReactNode } from "react";
+
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: ReactNode;
+  footer?: ReactNode;
+}
 
 const Modal = ({ isOpen, onClose, children, footer }: ModalProps) => {
   if (!isOpen) return null;
