@@ -2,108 +2,112 @@ import { useActionState, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import Header from "../components/layout/Header";
 import StatCard from "../components/ui/StatCard";
-import CustomerList from "../features/customers/components/CustomerList";
 import Modal from "../components/ui/Modal";
 import FormField from "../components/ui/FormField";
 import {
-  createCustomer,
-  deleteCustomer,
-  updateCustomer,
-} from "../features/customers/api/api";
-import type { Customer } from "../features/customers/types/Customer";
-import { useUser } from "../features/customers/hooks/useUser";
+  createItem,
+  deleteItem,
+  updateItem,
+} from "../features/items/api/api";
+import type { Item } from "../features/items/types/Item";
+import { useItems } from "../features/items/hooks/useItems";
 import { useQueryClient } from "@tanstack/react-query";
+import ItemList from "../features/items/components/ItemList";
 
-interface CustomerPageProps {
+interface ItemPageProps {
   activeTab: string;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (isOpen: boolean) => void;
 }
 
-const CustomerPage = ({
+const ItemPage = ({
   activeTab,
   isSidebarOpen,
   setIsSidebarOpen,
-}: CustomerPageProps) => {
+}: ItemPageProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const { data: customers, isLoading, error } = useUser();
+  const { data: items, isLoading, error } = useItems();
   const [id, setId] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null,
-  );
+  const [stock, setStock] = useState<number>(0);
+  const [price, setPrice] = useState<number>(0);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const queryClient = useQueryClient();
 
   const [, formAction, isPending] = useActionState(handleUpdate, null);
 
   if (isLoading) {
-    return <div>Loading customers...</div>;
+    return <div>Loading items...</div>;
   }
   if (error) {
-    return <div>Error loading customers</div>;
+    return <div>Error loading items</div>;
   }
 
   async function handleUpdate(_: any, formData: FormData) {
-    const name = formData.get("custName") as string;
-    const address = formData.get("custAddress") as string;
+    const name = formData.get("itemName") as string;
+    const stock = parseFloat(formData.get("itemStock") as string);
+    const price = parseFloat(formData.get("itemPrice") as string);
 
     try {
-      if (!name || !address) {
+      if (!name || !stock || !price) {
         alert("Please fill in all fields.");
         return;
       }
 
-      if (selectedCustomer) {
-        await updateCustomer({
+      if (selectedItem) {
+        await updateItem({
           id,
           name,
-          address,
-        } as Customer);
+          stock,
+          price,
+        } as Item);
       } else {
-        await createCustomer({
+        await createItem({
           name,
-          address,
-        } as Customer);
+          stock,
+          price,
+        } as Item);
       }
 
       setIsModalOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["items"] });
       return true;
     } catch (error) {
       console.error("Submission failed:", error);
-      alert("Failed to save customer. Please check the console.");
+      alert("Failed to save item. Please check the console.");
     }
   }
 
   function handleOpenCreate() {
-    setSelectedCustomer(null);
+    setSelectedItem(null);
     setName("");
-    setAddress("");
+    setStock(0);
+    setPrice(0);
     setIsModalOpen(true);
   }
 
-  function handleSelectCustomer(c: Customer) {
-    setSelectedCustomer(c);
-    setId(c.id || "");
-    setName(c.name);
-    setAddress(c.address || "");
+  function handleSelectItem(i: Item) {
+    setSelectedItem(i);
+    setId(i.id || "");
+    setName(i.name);
+    setStock(i.stock || 0);
+    setPrice(i.price || 0);
     setIsModalOpen(true);
   }
 
   async function handleDelete() {
     try {
-      if (selectedCustomer) {
-        await deleteCustomer({ id } as Customer);
-        queryClient.invalidateQueries({ queryKey: ["customers"] });
+      if (selectedItem) {
+        await deleteItem({ id } as Item);
+        queryClient.invalidateQueries({ queryKey: ["items"] });
         setIsModalOpen(false);
       } else {
-        throw new Error("deleting customer failed, select a customer!");
+        throw new Error("deleting item failed, select an item!");
       }
     } catch (error) {
       console.error("Submission failed:", error);
-      alert("Failed to save customer. Please check the console.");
+      alert("Failed to save item. Please check the console.");
     }
   }
 
@@ -136,19 +140,19 @@ const CustomerPage = ({
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-24">
-        <StatCard label="Customers" value={customers.length} />
+        <StatCard label="Items" value={items.length} />
         <StatCard label="Automation" value="83%" />
-        <StatCard label="Customer Details Validation" value="100%" />
+        <StatCard label="Item Details Validation" value="100%" />
         <StatCard label="Uptime" value="99.9%" />
       </div>
 
       {/* Database Section */}
-      {activeTab === "customer" ? (
-        <CustomerList
-          customers={customers || []}
+      {activeTab === "item" ? (
+        <ItemList
+          items={items || []}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          onSelectCustomer={handleSelectCustomer}
+          onSelectItem={handleSelectItem}
         />
       ) : (
         <div className="flex-1 border border-dashed border-zinc-800 flex items-center justify-center mb-20">
@@ -170,10 +174,10 @@ const CustomerPage = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         footer={
-          selectedCustomer ? (
+          selectedItem ? (
             <>
               <button
-                form="customer-form"
+                form="item-form"
                 disabled={isPending}
                 className="px-6 py-3 bg-[#d4ff00] text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all"
               >
@@ -192,7 +196,7 @@ const CustomerPage = ({
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[#d4ff00] font-mono text-[10px]">
-              {selectedCustomer ? "[EDIT]" : "[CREATE]"}
+              {selectedItem ? "[EDIT]" : "[CREATE]"}
             </span>
             <h3 className="text-xs font-black uppercase tracking-widest text-white">
               Registry Entry
@@ -202,21 +206,29 @@ const CustomerPage = ({
             Enter secure data to populate the POSER global ledger.
           </p>
         </div>
-        <form id="customer-form" className="space-y-2" action={formAction}>
+        <form id="item-form" className="space-y-2" action={formAction}>
           <FormField
-            name="custName"
-            label="Full Name"
-            placeholder="Entity Name"
+            name="itemName"
+            label="Item Name"
+            placeholder="Product Name"
             defaultValue={name}
           />
           <FormField
-            name="custAddress"
-            label="Postal Address"
-            placeholder="Global Location"
-            defaultValue={address}
+            name="itemStock"
+            label="Stock"
+            placeholder="0"
+            defaultValue={stock}
+            type="number"
+          />
+          <FormField
+            name="itemPrice"
+            label="Price"
+            placeholder="0.00"
+            defaultValue={price}
+            type="number"
           />
 
-          {!selectedCustomer && (
+          {!selectedItem && (
             <button className="mt-10 w-full bg-[#d4ff00] py-5 text-black text-xs font-black uppercase tracking-[0.3em] hover:brightness-110 transition-all flex items-center justify-center gap-2">
               Confirm Entry <ChevronRight size={14} />
             </button>
@@ -227,4 +239,4 @@ const CustomerPage = ({
   );
 };
 
-export default CustomerPage;
+export default ItemPage;

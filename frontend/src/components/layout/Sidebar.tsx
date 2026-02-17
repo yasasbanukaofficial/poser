@@ -23,9 +23,9 @@ const Sidebar = ({
   setIsSidebarOpen,
 }: SidebarProps) => {
   const tabs = [
+    { id: "customer", label: "Customers", icon: User },
     { id: "item", label: "Inventory", icon: Package },
     { id: "order", label: "Orders", icon: ShoppingCart },
-    { id: "customer", label: "Customers", icon: User },
   ];
 
   return (

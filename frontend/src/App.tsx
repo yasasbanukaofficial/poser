@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sidebar from "./components/layout/Sidebar";
 import CustomerPage from "./pages/CustomerPage";
+import ItemPage from "./pages/ItemPage"; // Import ItemPage
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export default function App() {
@@ -20,6 +21,13 @@ export default function App() {
 
         {activeTab === "customer" && (
           <CustomerPage
+            activeTab={activeTab}
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+          />
+        )}
+        {activeTab === "item" && ( // Add conditional rendering for ItemPage
+          <ItemPage
             activeTab={activeTab}
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
