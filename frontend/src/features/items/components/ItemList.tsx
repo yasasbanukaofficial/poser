@@ -50,10 +50,7 @@ const ItemList = ({
                   {i.name}
                 </div>
                 <div className="col-span-1 text-xs text-zinc-500 uppercase tracking-widest hidden md:block">
-                  Stock: {i.stock}
-                </div>
-                <div className="col-span-1 text-xs text-zinc-500 uppercase tracking-widest hidden md:block">
-                  Price: ${i.price}
+                  Stock: {i.stock} / Price: ${i.price}
                 </div>
                 <div className="col-span-1 flex justify-end">
                   <button
