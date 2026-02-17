@@ -10,7 +10,7 @@ export const fetchCustomerData = async () => {
   return rawData.map((user: any) => ({
     id: user.id.toString(),
     name: user.name,
-    address: `${user.address.city}, ${user.address.street}`,
+    address: `${user.address}`,
   }));
 };
 
