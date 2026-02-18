@@ -84,7 +84,6 @@ public class OrderServiceImpl implements OrderService {
         Order existingOrder = orderRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
 
-        // Restore quantities from old order details
         existingOrder.getOrderDetails().forEach(oldDetail -> {
             Item item = oldDetail.getItems();
             item.setQty(item.getQty() + oldDetail.getQty());
@@ -128,14 +127,14 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(Long id) {
         Order order = orderRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cannot delete. Order not found with ID: " + id));
-        
-        // Restore item quantities
+
         order.getOrderDetails().forEach(detail -> {
             Item item = detail.getItems();
             item.setQty(item.getQty() + detail.getQty());
             itemRepo.save(item);
         });
-        
-        orderRepo.deleteById(id);
+
+        order.getOrderDetails().clear();
+        orderRepo.delete(order);
     }
 }
