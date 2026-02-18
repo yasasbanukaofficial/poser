@@ -1,4 +1,15 @@
 package tech.yasasbanuka.backend.util;
 
-public class APIResponse {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class APIResponse<T> {
+    private boolean success;
+    private int status;
+    private String message;
+    private T data;
 }

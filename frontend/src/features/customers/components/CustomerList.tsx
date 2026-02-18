@@ -7,11 +7,12 @@ const CustomerList = ({
   setSearchQuery,
   onSelectCustomer,
 }: CustomerListProps) => {
-  const filtered = customers.filter(
-    (c: Customer) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.id || "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filtered = customers.filter((c: Customer) => {
+    const name = (c.name || "").toLowerCase();
+    const id = String(c.id ?? "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return name.includes(query) || id.includes(query);
+  });
 
   return (
     <section className="flex flex-col flex-1">

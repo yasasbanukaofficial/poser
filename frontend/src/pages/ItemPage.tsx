@@ -4,11 +4,7 @@ import Header from "../components/layout/Header";
 import StatCard from "../components/ui/StatCard";
 import Modal from "../components/ui/Modal";
 import FormField from "../components/ui/FormField";
-import {
-  createItem,
-  deleteItem,
-  updateItem,
-} from "../features/items/api/api";
+import { itemAPI } from "../features/items/api/api";
 import type { Item } from "../features/items/types/Item";
 import { useItems } from "../features/items/hooks/useItems";
 import { useQueryClient } from "@tanstack/react-query";
@@ -56,14 +52,14 @@ const ItemPage = ({
       }
 
       if (selectedItem) {
-        await updateItem({
+        await itemAPI.update({
           id,
           name,
           stock,
           price,
         } as Item);
       } else {
-        await createItem({
+        await itemAPI.create({
           name,
           stock,
           price,
@@ -99,7 +95,7 @@ const ItemPage = ({
   async function handleDelete() {
     try {
       if (selectedItem) {
-        await deleteItem({ id } as Item);
+        await itemAPI.delete(id);
         queryClient.invalidateQueries({ queryKey: ["items"] });
         setIsModalOpen(false);
       } else {

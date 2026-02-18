@@ -2,35 +2,36 @@ const URL = `http://localhost:8080/api/v1`;
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-export const handleApiRequest = async <T extends { id?: string | number }>(
+export const handleAPIRequest = async <T extends { id?: string | number }>(
   entity: string,
   method: HttpMethod,
   payload?: T,
 ) => {
-  const endpoint =
-    (method === "DELETE" || (method === "GET" && payload?.id)) && payload?.id
-      ? `${URL}/${entity}/${payload.id}`
-      : `${URL}/${entity}`;
+  const isIdRequest = (method === "DELETE" || method === "GET") && payload?.id;
+
+  const endpoint = isIdRequest
+    ? `${URL}/${entity}/${payload.id}`
+    : `${URL}/${entity}`;
 
   const options: RequestInit = {
     method: method,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   };
 
   if (["POST", "PUT"].includes(method) && payload) {
     options.body = JSON.stringify(payload);
   }
 
-  const res = await fetch(endpoint, options);
+  const rawResponse = await fetch(endpoint, options);
 
-  if (!res.ok) {
-    throw new Error(`Failed to ${method} ${entity}: ${res.statusText}`);
+  if (!rawResponse.ok) {
+    throw new Error(`Failed to ${method} ${entity}: ${rawResponse.statusText}`);
   }
 
+  const result = await rawResponse.json();
+
   if (method === "GET") {
-    return await res.json();
+    return result.data;
   }
 
   return true;

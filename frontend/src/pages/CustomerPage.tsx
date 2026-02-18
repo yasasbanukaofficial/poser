@@ -5,13 +5,9 @@ import StatCard from "../components/ui/StatCard";
 import CustomerList from "../features/customers/components/CustomerList";
 import Modal from "../components/ui/Modal";
 import FormField from "../components/ui/FormField";
-import {
-  createCustomer,
-  deleteCustomer,
-  updateCustomer,
-} from "../features/customers/api/api";
+import { customerAPI } from "../features/customers/api/api";
 import type { Customer } from "../features/customers/types/Customer";
-import { useUser } from "../features/customers/hooks/useUser";
+import { useCustomers } from "../features/customers/hooks/useUser";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface CustomerPageProps {
@@ -27,7 +23,7 @@ const CustomerPage = ({
 }: CustomerPageProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const { data: customers, isLoading, error } = useUser();
+  const { data: customers, isLoading, error } = useCustomers();
   const [id, setId] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
@@ -56,13 +52,13 @@ const CustomerPage = ({
       }
 
       if (selectedCustomer) {
-        await updateCustomer({
+        await customerAPI.update({
           id,
           name,
           address,
         } as Customer);
       } else {
-        await createCustomer({
+        await customerAPI.create({
           name,
           address,
         } as Customer);
@@ -95,7 +91,7 @@ const CustomerPage = ({
   async function handleDelete() {
     try {
       if (selectedCustomer) {
-        await deleteCustomer({ id } as Customer);
+        await customerAPI.delete(id);
         queryClient.invalidateQueries({ queryKey: ["customers"] });
         setIsModalOpen(false);
       } else {
