@@ -12,6 +12,7 @@ import type { Order, OrderItem } from "../features/orders/types/Order";
 import OrderList from "../features/orders/components/OrderList";
 import { useCustomers } from "../features/customers/hooks/useUser";
 import { useItems } from "../features/items/hooks/useItems";
+import type { Customer } from "../features/customers/types/Customer";
 
 interface OrderPageProps {
   activeTab: string;
@@ -33,7 +34,7 @@ const OrderPage = ({
   const queryClient = useQueryClient();
 
   // Form state
-  const [orderId, setOrderId] = useState<string>("");
+  const [orderId, setOrderId] = useState<number | undefined>(undefined);
   const [customerId, setCustomerId] = useState<string>("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
 
@@ -45,11 +46,11 @@ const OrderPage = ({
 
   useEffect(() => {
     if (selectedOrder) {
-      setOrderId(selectedOrder.id || "");
+      setOrderId(selectedOrder.id);
       setCustomerId(String(selectedOrder.customerId));
       setOrderItems(selectedOrder.orderDetails || []);
     } else {
-      setOrderId("");
+      setOrderId(undefined);
       setCustomerId("");
       setOrderItems([]);
     }
@@ -119,7 +120,7 @@ const OrderPage = ({
   async function handleDelete() {
     try {
       if (selectedOrder) {
-        await orderAPI.delete(orderId);
+        await orderAPI.delete(String(orderId));
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         setIsModalOpen(false);
       } else {
@@ -175,6 +176,14 @@ const OrderPage = ({
     .reduce((sum, item) => sum + item.price * item.qty, 0)
     .toFixed(2);
 
+  const enrichedOrders = orders?.map(order => {
+    const customer = customers?.find(c => c.id === order.customerId);
+    return {
+      ...order,
+      customerName: customer?.name || order.customerName,
+    };
+  }) || [];
+
   return (
     <main className="flex-1 md:ml-48 lg:ml-64 p-4 sm:p-6 md:p-12 lg:p-20 flex flex-col relative min-h-screen">
       <div className="flex justify-between items-center mb-24 font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-600">
@@ -203,10 +212,11 @@ const OrderPage = ({
       </div>
 
       <OrderList
-        orders={orders || []}
+        orders={enrichedOrders}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onSelectOrder={handleSelectOrder}
+        items={items || []}
       />
 
       <div className="fixed bottom-0 right-0 p-12 overflow-hidden pointer-events-none opacity-5">

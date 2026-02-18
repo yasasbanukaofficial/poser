@@ -24,7 +24,7 @@ const ItemPage = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: items, isLoading, error } = useItems();
-  const [id, setId] = useState<string>("");
+  const [id, setId] = useState<number | undefined>(undefined);
   const [name, setName] = useState<string>("");
   const [qty, setQty] = useState<number>(0);
   const [price, setPrice] = useState<number>(0);
@@ -85,7 +85,7 @@ const ItemPage = ({
 
   function handleSelectItem(i: Item) {
     setSelectedItem(i);
-    setId(i.id || "");
+    setId(i.id);
     setName(i.name);
     setQty(i.qty || 0);
     setPrice(i.price || 0);
@@ -95,7 +95,7 @@ const ItemPage = ({
   async function handleDelete() {
     try {
       if (selectedItem) {
-        await itemAPI.delete(id);
+        await itemAPI.delete(id as number);
         queryClient.invalidateQueries({ queryKey: ["items"] });
         setIsModalOpen(false);
       } else {

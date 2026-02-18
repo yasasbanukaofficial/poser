@@ -24,7 +24,7 @@ const CustomerPage = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: customers, isLoading, error } = useCustomers();
-  const [id, setId] = useState<string>("");
+  const [id, setId] = useState<number | undefined>(undefined);
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
@@ -82,7 +82,7 @@ const CustomerPage = ({
 
   function handleSelectCustomer(c: Customer) {
     setSelectedCustomer(c);
-    setId(c.id || "");
+    setId(c.id);
     setName(c.name);
     setAddress(c.address || "");
     setIsModalOpen(true);
@@ -91,7 +91,7 @@ const CustomerPage = ({
   async function handleDelete() {
     try {
       if (selectedCustomer) {
-        await customerAPI.delete(id);
+        await customerAPI.delete(id as number);
         queryClient.invalidateQueries({ queryKey: ["customers"] });
         setIsModalOpen(false);
       } else {

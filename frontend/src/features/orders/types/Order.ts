@@ -5,7 +5,7 @@ export interface OrderItem {
 }
 
 export interface Order {
-  id?: string;
+  id?: number;
   orderDate: string;
   customerId: number;
   customerName?: string;
