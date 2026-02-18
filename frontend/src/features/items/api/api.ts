@@ -1,60 +1,12 @@
+import { handleApiRequest } from "../../../api/api";
 import type { Item } from "../types/Item";
 
-const URL = `http://localhost:8080/api/v1`;
+export const fetchCustomerData = () => handleApiRequest("items", "GET");
+export const createItem = (payload: Item) =>
+  handleApiRequest("items", "POST", payload);
 
-export const fetchItemData = async () => {
-  const res = await fetch(`${URL}/items`);
-  if (!res.ok) throw new Error("Failed to fetch");
-  const rawData = await res.json();
+export const updateItem = (payload: Item) =>
+  handleApiRequest("items", "PUT", payload);
 
-  return rawData.map((item: any) => ({
-    id: item.id.toString(),
-    name: item.name,
-    stock: item.stock,
-    price: item.price,
-  }));
-};
-
-export const createItem = async (payload: Item) => {
-  const res = await fetch(`${URL}/items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  } else {
-    return true;
-  }
-};
-
-export const updateItem = async (payload: Item) => {
-  const res = await fetch(`${URL}/items`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  } else {
-    return true;
-  }
-};
-
-export const deleteItem = async (payload: Item) => {
-  const res = await fetch(`${URL}/items/${payload.id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch");
-  } else {
-    return true;
-  }
-};
+export const deleteItem = (payload: Item) =>
+  handleApiRequest("items", "DELETE", payload);
