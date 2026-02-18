@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tech.yasasbanuka.backend.util.APIResponse;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExcpetion {
@@ -54,4 +56,5 @@ public class GlobalExcpetion {
                 errors
         ),HttpStatus.BAD_REQUEST);
     }
+
 }

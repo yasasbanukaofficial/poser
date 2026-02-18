@@ -14,9 +14,10 @@ import tech.yasasbanuka.backend.repository.ItemRepo;
 import tech.yasasbanuka.backend.repository.OrderRepo;
 import tech.yasasbanuka.backend.service.OrderService;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,7 +30,7 @@ public class OrderServiceImpl implements OrderService {
     public void createOrder(OrderDTO orderDTO) {
         Customer customer = customerRepo.findById(orderDTO.getCustomerId()).orElseThrow(() -> new RuntimeException("Customer not found with id: " + orderDTO.getCustomerId()));
         Order order = new Order();
-        order.setOrderDate(orderDTO.getOrderDate().toLocalDateTime());
+        order.setOrderDate(orderDTO.getOrderDate());
         order.setCustomer(customer);
 
         List<OrderDetails> orderDetailsList = new ArrayList<>();
@@ -60,7 +61,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDTO> getAllOrders() {
-        return List.of();
+        return orderRepo.findAll().stream()
+                .map(order -> {
+                    OrderDTO orderDTO = new OrderDTO();
+                    orderDTO.setId(order.getId());
+                    orderDTO.setCustomerId(order.getCustomer().getId());
+                    orderDTO.setOrderDate(order.getOrderDate());
+                    orderDTO.setOrderDetails(order.getOrderDetails().stream()
+                            .map(details -> {
+                                OrderDetailsDTO detailsDTO = new OrderDetailsDTO();
+                                detailsDTO.setId(details.getId());
+                                detailsDTO.setItemId(details.getItems().getId());
+                                detailsDTO.setQty(details.getQty());
+                                detailsDTO.setPrice(details.getPrice());
+                                return detailsDTO;
+                            }).toList());
+                    return orderDTO;
+                }).toList();
     }
 
     @Override
@@ -69,13 +86,84 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> getOrdersByDateRange(LocalDateTime start, LocalDateTime end) {
-        return List.of();
+    public List<OrderDTO> getOrdersByDateRange(OffsetDateTime start, OffsetDateTime end) {
+        return orderRepo.findByOrderDateBetween(start, end).stream()
+                .map(order -> {
+                    OrderDTO orderDTO = new OrderDTO();
+                    orderDTO.setId(order.getId());
+                    orderDTO.setCustomerId(order.getCustomer().getId());
+                    orderDTO.setOrderDate(order.getOrderDate());
+                    orderDTO.setOrderDetails(order.getOrderDetails().stream()
+                            .map(details -> {
+                                OrderDetailsDTO detailsDTO = new OrderDetailsDTO();
+                                detailsDTO.setId(details.getId());
+                                detailsDTO.setItemId(details.getItems().getId());
+                                detailsDTO.setQty(details.getQty());
+                                detailsDTO.setPrice(details.getPrice());
+                                return detailsDTO;
+                            }).collect(Collectors.toList()));
+                    return orderDTO;
+                }).collect(Collectors.toList());
     }
 
     @Override
     public OrderDTO updateOrder(Long id, OrderDTO orderDTO) {
-        return null;
+        Order existingOrder = orderRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        if (!existingOrder.getCustomer().getId().equals(orderDTO.getCustomerId())) {
+            Customer newCustomer = customerRepo.findById(orderDTO.getCustomerId())
+                    .orElseThrow(() -> new RuntimeException("Customer not found with id: " + orderDTO.getCustomerId()));
+            existingOrder.setCustomer(newCustomer);
+        }
+
+        existingOrder.setOrderDate(orderDTO.getOrderDate());
+
+        existingOrder.getOrderDetails().forEach(detail -> {
+            Item item = detail.getItems();
+            item.setQty(item.getQty() + detail.getQty());
+            itemRepo.save(item);
+        });
+
+        List<OrderDetails> newOrderDetails = new ArrayList<>();
+        for (OrderDetailsDTO detailDTO : orderDTO.getOrderDetails()) {
+            Item item = itemRepo.findById(detailDTO.getItemId())
+                    .orElseThrow(() -> new RuntimeException("Item not found with id: " + detailDTO.getItemId()));
+
+            if (item.getQty() < detailDTO.getQty()) {
+                throw new RuntimeException("Insufficient stock for item: " + item.getName());
+            }
+
+            item.setQty(item.getQty() - detailDTO.getQty());
+            itemRepo.save(item);
+
+            OrderDetails orderDetail = new OrderDetails();
+            orderDetail.setItems(item);
+            orderDetail.setOrder(existingOrder);
+            orderDetail.setQty(detailDTO.getQty());
+            orderDetail.setPrice(detailDTO.getPrice());
+            newOrderDetails.add(orderDetail);
+        }
+
+        existingOrder.getOrderDetails().clear();
+        existingOrder.getOrderDetails().addAll(newOrderDetails);
+        Order savedOrder = orderRepo.save(existingOrder);
+
+        OrderDTO responseDTO = new OrderDTO();
+        responseDTO.setId(savedOrder.getId());
+        responseDTO.setCustomerId(savedOrder.getCustomer().getId());
+        responseDTO.setOrderDate(savedOrder.getOrderDate());
+        responseDTO.setOrderDetails(savedOrder.getOrderDetails().stream()
+                .map(details -> {
+                    OrderDetailsDTO detailsDTO = new OrderDetailsDTO();
+                    detailsDTO.setId(details.getId());
+                    detailsDTO.setItemId(details.getItems().getId());
+                    detailsDTO.setQty(details.getQty());
+                    detailsDTO.setPrice(details.getPrice());
+                    return detailsDTO;
+                }).collect(Collectors.toList()));
+
+        return responseDTO;
     }
 
     @Override

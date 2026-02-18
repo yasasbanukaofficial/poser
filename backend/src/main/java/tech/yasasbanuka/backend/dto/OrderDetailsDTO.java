@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class OrderDetailsDTO {
+    private Long id;
     @NotNull(message = "Item ID cannot be null")
     private Long itemId;
 

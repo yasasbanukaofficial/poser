@@ -10,7 +10,7 @@ import tech.yasasbanuka.backend.dto.OrderDTO;
 import tech.yasasbanuka.backend.service.OrderService;
 import tech.yasasbanuka.backend.util.APIResponse;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -26,42 +26,35 @@ public class OrderController {
         orderService.createOrder(orderDTO);
         return new ResponseEntity<>(new APIResponse<>(true, 201, "Order created successfully", null), HttpStatus.CREATED);
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
-        OrderDTO order = orderService.getOrderById(id);
-        return ResponseEntity.ok(order);
-    }
-
     @GetMapping
-    public ResponseEntity<List<OrderDTO>> getAllOrders() {
+    public ResponseEntity<APIResponse<List<OrderDTO>>> getAllOrders() {
         List<OrderDTO> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders);
+        return new ResponseEntity<>(new APIResponse<>(true, 200, "Orders retrieved successfully", orders), HttpStatus.OK);
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<OrderDTO>> getOrdersByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<APIResponse<List<OrderDTO>>> getOrdersByCustomerId(@PathVariable Long customerId) {
         List<OrderDTO> orders = orderService.getOrdersByCustomerId(customerId);
-        return ResponseEntity.ok(orders);
+        return new ResponseEntity<>(new APIResponse<>(true, 200, "Customer orders retrieved successfully", orders), HttpStatus.OK);
     }
 
     @GetMapping("/date-range")
-    public ResponseEntity<List<OrderDTO>> getOrdersByDateRange(
-            @RequestParam LocalDateTime start,
-            @RequestParam LocalDateTime end) {
+    public ResponseEntity<APIResponse<List<OrderDTO>>> getOrdersByDateRange(
+            @RequestParam OffsetDateTime start,
+            @RequestParam OffsetDateTime end) {
         List<OrderDTO> orders = orderService.getOrdersByDateRange(start, end);
-        return ResponseEntity.ok(orders);
+        return new ResponseEntity<>(new APIResponse<>(true, 200, "Orders retrieved successfully", orders), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderDTO orderDTO) {
+    public ResponseEntity<APIResponse<OrderDTO>> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderDTO orderDTO) {
         OrderDTO updatedOrder = orderService.updateOrder(id, orderDTO);
-        return ResponseEntity.ok(updatedOrder);
+        return new ResponseEntity<>(new APIResponse<>(true, 200, "Order updated successfully", updatedOrder), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<APIResponse<String>> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(new APIResponse<>(true, 200, "Order deleted successfully", null), HttpStatus.OK);
     }
 }
