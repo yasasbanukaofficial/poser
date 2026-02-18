@@ -294,9 +294,10 @@ const OrderPage = ({
                   type="number"
                   placeholder="Qty"
                   defaultValue={currentItemQty}
-                  onChange={(e) =>
-                    setCurrentItemQty(parseInt(e.target.value, 10))
-                  }
+                  onChange={(e) => {
+                    const num = parseInt(e.target.value, 10);
+                    setCurrentItemQty(isNaN(num) ? 1 : num);
+                  }}
                 />
               </div>
               <button
