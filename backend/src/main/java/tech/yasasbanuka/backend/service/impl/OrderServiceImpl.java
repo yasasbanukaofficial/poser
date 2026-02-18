@@ -2,9 +2,9 @@ package tech.yasasbanuka.backend.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tech.yasasbanuka.backend.dto.OrderDTO;
-import tech.yasasbanuka.backend.dto.OrderDetailsDTO;
 import tech.yasasbanuka.backend.entity.Customer;
 import tech.yasasbanuka.backend.entity.Item;
 import tech.yasasbanuka.backend.entity.Order;
@@ -15,9 +15,7 @@ import tech.yasasbanuka.backend.repository.OrderRepo;
 import tech.yasasbanuka.backend.service.OrderService;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -26,90 +24,72 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepo orderRepo;
     private final CustomerRepo customerRepo;
     private final ItemRepo itemRepo;
+    private final ModelMapper modelMapper;
     @Override
     public void createOrder(OrderDTO orderDTO) {
         Customer customer = customerRepo.findById(orderDTO.getCustomerId()).orElseThrow(() -> new RuntimeException("Customer not found with id: " + orderDTO.getCustomerId()));
-        Order order = new Order();
-        order.setOrderDate(orderDTO.getOrderDate());
+        
+        Order order = modelMapper.map(orderDTO, Order.class);
         order.setCustomer(customer);
 
-        List<OrderDetails> orderDetailsList = new ArrayList<>();
-        for (OrderDetailsDTO orderDetailsDTO: orderDTO.getOrderDetails()) {
+        List<OrderDetails> orderDetailsList = orderDTO.getOrderDetails().stream().map(orderDetailsDTO -> {
+            OrderDetails orderDetails = modelMapper.map(orderDetailsDTO, OrderDetails.class);
+            orderDetails.setOrder(order);
             Item item = itemRepo.findById(orderDetailsDTO.getItemId()).orElseThrow(() -> new RuntimeException("Item not found with id: " + orderDetailsDTO.getItemId()));
-            if (item.getQty() < orderDetailsDTO.getQty()){
+            
+            // Reduce item quantity
+            if (item.getQty() < orderDetailsDTO.getQty()) {
                 throw new RuntimeException("Insufficient stock for item: " + item.getName());
             }
             item.setQty(item.getQty() - orderDetailsDTO.getQty());
             itemRepo.save(item);
-
-            OrderDetails orderDetails = new OrderDetails();
+            
             orderDetails.setItems(item);
-            orderDetails.setOrder(order);
-            orderDetails.setQty(orderDetailsDTO.getQty());
-            orderDetails.setPrice(orderDetailsDTO.getPrice());
+            return orderDetails;
+        }).toList();
 
-            orderDetailsList.add(orderDetails);
-        }
         order.setOrderDetails(orderDetailsList);
         orderRepo.save(order);
     }
 
     @Override
     public OrderDTO getOrderById(Long id) {
-        return null;
+        Order order = orderRepo.findById(id).orElseThrow(() -> new RuntimeException("Order Not found"));
+        return modelMapper.map(order, OrderDTO.class);
     }
 
     @Override
     public List<OrderDTO> getAllOrders() {
         return orderRepo.findAll().stream()
-                .map(order -> {
-                    OrderDTO orderDTO = new OrderDTO();
-                    orderDTO.setId(order.getId());
-                    orderDTO.setCustomerId(order.getCustomer().getId());
-                    orderDTO.setOrderDate(order.getOrderDate());
-                    orderDTO.setOrderDetails(order.getOrderDetails().stream()
-                            .map(details -> {
-                                OrderDetailsDTO detailsDTO = new OrderDetailsDTO();
-                                detailsDTO.setId(details.getId());
-                                detailsDTO.setItemId(details.getItems().getId());
-                                detailsDTO.setQty(details.getQty());
-                                detailsDTO.setPrice(details.getPrice());
-                                return detailsDTO;
-                            }).toList());
-                    return orderDTO;
-                }).toList();
+                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .toList();
     }
 
     @Override
     public List<OrderDTO> getOrdersByCustomerId(Long customerId) {
-        return List.of();
+        return orderRepo.findByCustomer_Id(customerId).stream()
+                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .toList();
     }
 
     @Override
     public List<OrderDTO> getOrdersByDateRange(OffsetDateTime start, OffsetDateTime end) {
         return orderRepo.findByOrderDateBetween(start, end).stream()
-                .map(order -> {
-                    OrderDTO orderDTO = new OrderDTO();
-                    orderDTO.setId(order.getId());
-                    orderDTO.setCustomerId(order.getCustomer().getId());
-                    orderDTO.setOrderDate(order.getOrderDate());
-                    orderDTO.setOrderDetails(order.getOrderDetails().stream()
-                            .map(details -> {
-                                OrderDetailsDTO detailsDTO = new OrderDetailsDTO();
-                                detailsDTO.setId(details.getId());
-                                detailsDTO.setItemId(details.getItems().getId());
-                                detailsDTO.setQty(details.getQty());
-                                detailsDTO.setPrice(details.getPrice());
-                                return detailsDTO;
-                            }).collect(Collectors.toList()));
-                    return orderDTO;
-                }).collect(Collectors.toList());
+                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .toList();
     }
 
     @Override
     public OrderDTO updateOrder(Long id, OrderDTO orderDTO) {
         Order existingOrder = orderRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        // Restore quantities from old order details
+        existingOrder.getOrderDetails().forEach(oldDetail -> {
+            Item item = oldDetail.getItems();
+            item.setQty(item.getQty() + oldDetail.getQty());
+            itemRepo.save(item);
+        });
 
         if (!existingOrder.getCustomer().getId().equals(orderDTO.getCustomerId())) {
             Customer newCustomer = customerRepo.findById(orderDTO.getCustomerId())
@@ -119,14 +99,10 @@ public class OrderServiceImpl implements OrderService {
 
         existingOrder.setOrderDate(orderDTO.getOrderDate());
 
-        existingOrder.getOrderDetails().forEach(detail -> {
-            Item item = detail.getItems();
-            item.setQty(item.getQty() + detail.getQty());
-            itemRepo.save(item);
-        });
+        List<OrderDetails> newOrderDetails = orderDTO.getOrderDetails().stream().map(detailDTO -> {
+            OrderDetails orderDetail = modelMapper.map(detailDTO, OrderDetails.class);
+            orderDetail.setOrder(existingOrder);
 
-        List<OrderDetails> newOrderDetails = new ArrayList<>();
-        for (OrderDetailsDTO detailDTO : orderDTO.getOrderDetails()) {
             Item item = itemRepo.findById(detailDTO.getItemId())
                     .orElseThrow(() -> new RuntimeException("Item not found with id: " + detailDTO.getItemId()));
 
@@ -137,37 +113,29 @@ public class OrderServiceImpl implements OrderService {
             item.setQty(item.getQty() - detailDTO.getQty());
             itemRepo.save(item);
 
-            OrderDetails orderDetail = new OrderDetails();
             orderDetail.setItems(item);
-            orderDetail.setOrder(existingOrder);
-            orderDetail.setQty(detailDTO.getQty());
-            orderDetail.setPrice(detailDTO.getPrice());
-            newOrderDetails.add(orderDetail);
-        }
+            return orderDetail;
+        }).toList();
 
         existingOrder.getOrderDetails().clear();
         existingOrder.getOrderDetails().addAll(newOrderDetails);
         Order savedOrder = orderRepo.save(existingOrder);
 
-        OrderDTO responseDTO = new OrderDTO();
-        responseDTO.setId(savedOrder.getId());
-        responseDTO.setCustomerId(savedOrder.getCustomer().getId());
-        responseDTO.setOrderDate(savedOrder.getOrderDate());
-        responseDTO.setOrderDetails(savedOrder.getOrderDetails().stream()
-                .map(details -> {
-                    OrderDetailsDTO detailsDTO = new OrderDetailsDTO();
-                    detailsDTO.setId(details.getId());
-                    detailsDTO.setItemId(details.getItems().getId());
-                    detailsDTO.setQty(details.getQty());
-                    detailsDTO.setPrice(details.getPrice());
-                    return detailsDTO;
-                }).collect(Collectors.toList()));
-
-        return responseDTO;
+        return modelMapper.map(savedOrder, OrderDTO.class);
     }
 
     @Override
     public void deleteOrder(Long id) {
-
+        Order order = orderRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cannot delete. Order not found with ID: " + id));
+        
+        // Restore item quantities
+        order.getOrderDetails().forEach(detail -> {
+            Item item = detail.getItems();
+            item.setQty(item.getQty() + detail.getQty());
+            itemRepo.save(item);
+        });
+        
+        orderRepo.deleteById(id);
     }
 }
