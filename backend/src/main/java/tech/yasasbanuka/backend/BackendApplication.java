@@ -1,5 +1,6 @@
 package tech.yasasbanuka.backend;
 
+import io.github.yasasbanukaofficial.MiniModelMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,5 +15,10 @@ public class BackendApplication {
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
+    }
+
+    @Bean
+    public MiniModelMapper miniModelMapper() {
+        return new MiniModelMapper();
     }
 }

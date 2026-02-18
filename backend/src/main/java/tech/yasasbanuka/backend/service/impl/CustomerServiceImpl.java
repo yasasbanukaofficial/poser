@@ -1,5 +1,6 @@
 package tech.yasasbanuka.backend.service.impl;
 
+import io.github.yasasbanukaofficial.MiniModelMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepo customerRepo;
-    private final ModelMapper modelMapper;
+    private final MiniModelMapper miniModelMapper;
+
     @Override
     public void createCustomer(CustomerDTO customerDTO) {
-        customerRepo.save(modelMapper.map(customerDTO, Customer.class));
+        customerRepo.save(miniModelMapper.map(customerDTO, Customer.class));
     }
 
     @Override
     public void updateCustomer(CustomerDTO customerDTO) {
-        customerRepo.save(modelMapper.map(customerDTO, Customer.class));
+        customerRepo.save(miniModelMapper.map(customerDTO, Customer.class));
     }
 
     @Override
@@ -33,17 +35,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO getCustomer(Long id) {
         Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Error when finding the customer using id"));
-        return modelMapper.map(customer, CustomerDTO.class);
+        return miniModelMapper.map(customer, CustomerDTO.class);
     }
 
     @Override
     public CustomerDTO getCustomerByName(String name) {
         Customer customer = customerRepo.findByName(name).orElseThrow(() -> new RuntimeException("Error when finding the customer using name"));
-        return modelMapper.map(customer, CustomerDTO.class);
+        return miniModelMapper.map(customer, CustomerDTO.class);
     }
 
     @Override
     public List<CustomerDTO> getAllCustomers() {
-        return customerRepo.findAll().stream().map(customer -> modelMapper.map(customer, CustomerDTO.class)).toList();
+        return customerRepo.findAll().stream().map(customer -> miniModelMapper.map(customer, CustomerDTO.class)).toList();
     }
 }
