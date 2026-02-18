@@ -13,9 +13,19 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExcpetion {
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<APIResponse<String>> handleCustomException(CustomException ex) {
+        return new ResponseEntity<>(
+                new APIResponse<>(false, 400, ex.getMessage(), null),
+                HttpStatus.BAD_REQUEST
+        );
+    }
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<APIResponse<String>> handleGlobalException(CustomException e) {
-        return new ResponseEntity<>(new APIResponse<>(false, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<APIResponse<String>> handleOtherExceptions(Exception ex) {
+        return new ResponseEntity<>(
+                new APIResponse<>(false, 500, "Internal Server Error: " + ex.getMessage(), null),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<APIResponse<String>> handleNullPointer(NullPointerException e) {

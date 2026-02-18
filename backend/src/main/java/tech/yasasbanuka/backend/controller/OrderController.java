@@ -3,9 +3,12 @@ package tech.yasasbanuka.backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import tech.yasasbanuka.backend.dto.OrderDTO;
 import tech.yasasbanuka.backend.service.OrderService;
+import tech.yasasbanuka.backend.util.APIResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,13 +17,14 @@ import java.util.List;
 @RequestMapping("/api/v1/orders")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
+@Validated
 public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO) {
-        OrderDTO createdOrder = orderService.createOrder(orderDTO);
-        return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
+    ResponseEntity<APIResponse<String>> createOrder(@Valid @RequestBody OrderDTO orderDTO) {
+        orderService.createOrder(orderDTO);
+        return new ResponseEntity<>(new APIResponse<>(true, 201, "Order created successfully", null), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -50,7 +54,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @RequestBody OrderDTO orderDTO) {
+    public ResponseEntity<OrderDTO> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderDTO orderDTO) {
         OrderDTO updatedOrder = orderService.updateOrder(id, orderDTO);
         return ResponseEntity.ok(updatedOrder);
     }

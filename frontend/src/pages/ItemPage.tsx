@@ -26,7 +26,7 @@ const ItemPage = ({
   const { data: items, isLoading, error } = useItems();
   const [id, setId] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [stock, setStock] = useState<number>(0);
+  const [qty, setQty] = useState<number>(0);
   const [price, setPrice] = useState<number>(0);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const queryClient = useQueryClient();
@@ -42,11 +42,11 @@ const ItemPage = ({
 
   async function handleUpdate(_: any, formData: FormData) {
     const name = formData.get("itemName") as string;
-    const stock = parseFloat(formData.get("itemStock") as string);
+    const qty = parseFloat(formData.get("itemQty") as string);
     const price = parseFloat(formData.get("itemPrice") as string);
 
     try {
-      if (!name || !stock || !price) {
+      if (!name || Number.isNaN(qty) || Number.isNaN(price)) {
         alert("Please fill in all fields.");
         return;
       }
@@ -55,13 +55,13 @@ const ItemPage = ({
         await itemAPI.update({
           id,
           name,
-          stock,
+          qty,
           price,
         } as Item);
       } else {
         await itemAPI.create({
           name,
-          stock,
+          qty,
           price,
         } as Item);
       }
@@ -78,7 +78,7 @@ const ItemPage = ({
   function handleOpenCreate() {
     setSelectedItem(null);
     setName("");
-    setStock(0);
+    setQty(0);
     setPrice(0);
     setIsModalOpen(true);
   }
@@ -87,7 +87,7 @@ const ItemPage = ({
     setSelectedItem(i);
     setId(i.id || "");
     setName(i.name);
-    setStock(i.stock || 0);
+    setQty(i.qty || 0);
     setPrice(i.price || 0);
     setIsModalOpen(true);
   }
@@ -210,10 +210,10 @@ const ItemPage = ({
             defaultValue={name}
           />
           <FormField
-            name="itemStock"
-            label="Stock"
+            name="itemQty"
+            label="Quantity"
             placeholder="0"
-            defaultValue={stock}
+            defaultValue={qty}
             type="number"
           />
           <FormField

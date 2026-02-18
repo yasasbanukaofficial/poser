@@ -3,6 +3,7 @@ package tech.yasasbanuka.backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tech.yasasbanuka.backend.dto.CustomerDTO;
 import tech.yasasbanuka.backend.service.CustomerService;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api/v1/customers")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
+@Validated
 public class CustomerController {
     private final CustomerService customerService;
 

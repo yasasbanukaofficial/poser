@@ -29,7 +29,7 @@ public class OrderServiceImpl implements OrderService {
     public void createOrder(OrderDTO orderDTO) {
         Customer customer = customerRepo.findById(orderDTO.getCustomerId()).orElseThrow(() -> new RuntimeException("Customer not found with id: " + orderDTO.getCustomerId()));
         Order order = new Order();
-        order.setOrderDate(orderDTO.getOrderDate());
+        order.setOrderDate(orderDTO.getOrderDate().toLocalDateTime());
         order.setCustomer(customer);
 
         List<OrderDetails> orderDetailsList = new ArrayList<>();

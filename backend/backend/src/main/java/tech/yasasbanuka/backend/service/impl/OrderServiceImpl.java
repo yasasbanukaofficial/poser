@@ -53,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
 
                 OrderDetails orderDetail = new OrderDetails();
                 orderDetail.setPrice(detailDTO.getPrice());
-                orderDetail.setQuantity(detailDTO.getQuantity());
+                orderDetail.setQty(detailDTO.getQuantity());
                 orderDetail.setItems(item);
                 orderDetail.setOrder(order);
 
@@ -87,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDTO> getOrdersByCustomerId(Long customerId) {
-        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        List<Order> orders = orderRepository.findByCustomer_Id(customerId);
         return OrderUtil.toDTOList(orders);
     }
 

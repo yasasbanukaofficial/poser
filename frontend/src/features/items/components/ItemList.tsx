@@ -7,11 +7,12 @@ const ItemList = ({
   setSearchQuery,
   onSelectItem,
 }: ItemListProps) => {
-  const filtered = items.filter(
-    (i: Item) =>
-      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (i.id || "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filtered = items.filter((i: Item) => {
+    const name = (i.name || "").toLowerCase();
+    const id = String(i.id ?? "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return name.includes(query) || id.includes(query);
+  });
 
   return (
     <section className="flex flex-col flex-1">
@@ -50,7 +51,7 @@ const ItemList = ({
                   {i.name}
                 </div>
                 <div className="col-span-1 text-xs text-zinc-500 uppercase tracking-widest hidden md:block">
-                  Stock: {i.stock} / Price: ${i.price}
+                  Stock: {i.qty} / Price: ${i.price}
                 </div>
                 <div className="col-span-1 flex justify-end">
                   <button
