@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class OrderDTO {
     private Long id;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private OffsetDateTime orderDate;
+    private Date orderDate;
 
     @NotNull(message = "Customer ID cannot be null")
     @Positive(message = "Customer ID must be a positive number")

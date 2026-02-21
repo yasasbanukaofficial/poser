@@ -8,7 +8,7 @@ interface OrderListProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onSelectOrder: (order: Order) => void;
-  items: Item[]; // Add items prop
+  items: Item[];
 }
 
 const OrderList = ({
@@ -16,19 +16,26 @@ const OrderList = ({
   searchQuery,
   setSearchQuery,
   onSelectOrder,
-  items, // Destructure items prop
+  items,
 }: OrderListProps) => {
   const filtered = orders.filter((o: Order) => {
     const id = (o.id?.toString() || "").toLowerCase();
     const customerName = (o.customerName || "").toLowerCase();
-    const orderDate = o.orderDate.toLowerCase(); 
-    const itemNames = o.orderDetails.map(detail => {
-      const item = items.find(i => i.id === detail.itemId);
-      return (item?.name || "").toLowerCase();
-    }).join(" ");
+    const orderDate = o.orderDate.toLowerCase();
+    const itemNames = o.orderDetails
+      .map((detail) => {
+        const item = items.find((i) => i.id === detail.itemId);
+        return (item?.name || "").toLowerCase();
+      })
+      .join(" ");
 
     const query = searchQuery.toLowerCase();
-    return id.includes(query) || customerName.includes(query) || orderDate.includes(query) || itemNames.includes(query);
+    return (
+      id.includes(query) ||
+      customerName.includes(query) ||
+      orderDate.includes(query) ||
+      itemNames.includes(query)
+    );
   });
 
   return (
@@ -55,12 +62,15 @@ const OrderList = ({
       <div className="grid grid-cols-1 gap-px bg-zinc-900 border border-zinc-900 mb-20">
         {filtered.length > 0 ? (
           filtered.map((o: Order, i: number) => {
-            const totalAmount = o.orderDetails.reduce((sum, detail) => sum + (detail.qty * detail.price), 0);
+            const totalAmount = o.orderDetails.reduce(
+              (sum, detail) => sum + detail.qty * detail.price,
+              0,
+            );
             return (
               <div
-                key={o.id || i} 
+                key={o.id || i}
                 onClick={() => onSelectOrder && onSelectOrder(o)}
-                className="bg-[#0a0a0a] p-6 md:p-8 flex flex-col justify-between group hover:bg-zinc-900/40 transition-all cursor-crosshair relative" 
+                className="bg-[#0a0a0a] p-6 md:p-8 flex flex-col justify-between group hover:bg-zinc-900/40 transition-all cursor-crosshair relative"
               >
                 <div className="grid grid-cols-1 md:grid-cols-4 w-full items-center gap-4">
                   <div className="col-span-1 font-mono text-[#d4ff00] text-xs">
@@ -89,10 +99,13 @@ const OrderList = ({
                   <div>Date: {new Date(o.orderDate).toLocaleDateString()}</div>
                   <div className="mt-2 flex flex-wrap gap-x-4">
                     {o.orderDetails.map((detail, detailIdx) => {
-                      const item = items.find(item => item.id === detail.itemId);
+                      const item = items.find(
+                        (item) => item.id === detail.itemId,
+                      );
                       return (
                         <span key={detailIdx} className="mb-1">
-                          {item?.name || "Unknown Item"} (x{detail.qty}) @ ${detail.price.toFixed(2)}
+                          {item?.name || "Unknown Item"} (x{detail.qty}) @ $
+                          {detail.price.toFixed(2)}
                         </span>
                       );
                     })}
