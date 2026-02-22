@@ -1,8 +1,8 @@
 package tech.yasasbanuka.backend.service.impl;
 
-import io.github.yasasbanukaofficial.MiniModelMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tech.yasasbanuka.backend.dto.OrderDTO;
 import tech.yasasbanuka.backend.entity.Customer;
@@ -24,16 +24,16 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepo orderRepo;
     private final CustomerRepo customerRepo;
     private final ItemRepo itemRepo;
-    private final MiniModelMapper miniModelMapper;
+    private final ModelMapper modelMapper;
     @Override
     public void createOrder(OrderDTO orderDTO) {
         Customer customer = customerRepo.findById(orderDTO.getCustomerId()).orElseThrow(() -> new RuntimeException("Customer not found with id: " + orderDTO.getCustomerId()));
         
-        Order order = miniModelMapper.map(orderDTO, Order.class);
+        Order order = modelMapper.map(orderDTO, Order.class);
         order.setCustomer(customer);
 
         List<OrderDetails> orderDetailsList = orderDTO.getOrderDetails().stream().map(orderDetailsDTO -> {
-            OrderDetails orderDetails = miniModelMapper.map(orderDetailsDTO, OrderDetails.class);
+            OrderDetails orderDetails = modelMapper.map(orderDetailsDTO, OrderDetails.class);
             orderDetails.setOrder(order);
             Item item = itemRepo.findById(orderDetailsDTO.getItemId()).orElseThrow(() -> new RuntimeException("Item not found with id: " + orderDetailsDTO.getItemId()));
             
@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
             item.setQty(item.getQty() - orderDetailsDTO.getQty());
             itemRepo.save(item);
             
-            orderDetails.setItems(item);
+            orderDetails.setItem(item);
             return orderDetails;
         }).toList();
 
@@ -54,27 +54,27 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepo.findById(id).orElseThrow(() -> new RuntimeException("Order Not found"));
-        return miniModelMapper.map(order, OrderDTO.class);
+        return modelMapper.map(order, OrderDTO.class);
     }
 
     @Override
     public List<OrderDTO> getAllOrders() {
         return orderRepo.findAll().stream()
-                .map(order -> miniModelMapper.map(order, OrderDTO.class))
+                .map(order -> modelMapper.map(order, OrderDTO.class))
                 .toList();
     }
 
     @Override
     public List<OrderDTO> getOrdersByCustomerId(Long customerId) {
         return orderRepo.findByCustomer_Id(customerId).stream()
-                .map(order -> miniModelMapper.map(order, OrderDTO.class))
+                .map(order -> modelMapper.map(order, OrderDTO.class))
                 .toList();
     }
 
     @Override
     public List<OrderDTO> getOrdersByDateRange(OffsetDateTime start, OffsetDateTime end) {
         return orderRepo.findByOrderDateBetween(start, end).stream()
-                .map(order -> miniModelMapper.map(order, OrderDTO.class))
+                .map(order -> modelMapper.map(order, OrderDTO.class))
                 .toList();
     }
 
@@ -84,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
 
         existingOrder.getOrderDetails().forEach(oldDetail -> {
-            Item item = oldDetail.getItems();
+            Item item = oldDetail.getItem();
             item.setQty(item.getQty() + oldDetail.getQty());
             itemRepo.save(item);
         });
@@ -98,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
         existingOrder.setOrderDate(orderDTO.getOrderDate());
 
         List<OrderDetails> newOrderDetails = orderDTO.getOrderDetails().stream().map(detailDTO -> {
-            OrderDetails orderDetail = miniModelMapper.map(detailDTO, OrderDetails.class);
+            OrderDetails orderDetail = modelMapper.map(detailDTO, OrderDetails.class);
             orderDetail.setOrder(existingOrder);
 
             Item item = itemRepo.findById(detailDTO.getItemId())
@@ -111,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
             item.setQty(item.getQty() - detailDTO.getQty());
             itemRepo.save(item);
 
-            orderDetail.setItems(item);
+            orderDetail.setItem(item);
             return orderDetail;
         }).toList();
 
@@ -119,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
         existingOrder.getOrderDetails().addAll(newOrderDetails);
         Order savedOrder = orderRepo.save(existingOrder);
 
-        return miniModelMapper.map(savedOrder, OrderDTO.class);
+        return modelMapper.map(savedOrder, OrderDTO.class);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Cannot delete. Order not found with ID: " + id));
 
         order.getOrderDetails().forEach(detail -> {
-            Item item = detail.getItems();
+            Item item = detail.getItem();
             item.setQty(item.getQty() + detail.getQty());
             itemRepo.save(item);
         });
